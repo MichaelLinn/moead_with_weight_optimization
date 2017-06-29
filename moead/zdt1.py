@@ -9,6 +9,7 @@ from moead_ import moead_
 from moead_w2 import moead_w2
 import math
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 IND_SIZE = 10
 

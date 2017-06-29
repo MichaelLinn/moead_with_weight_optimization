@@ -4,8 +4,23 @@ import math
 import numpy as np
 import pandas as pd
 from copy import deepcopy
+import re
 
-class moead_w2(object):
+IND_SIZE = 10
+
+IND_INIT_SIZE = 5
+MAX_ITEM = 50
+MAX_WEIGHT = 50
+NBR_ITEMS = 20
+
+NGEN = 50
+n_subproblem = 100
+LAMBDA = 2
+CXPB = 0.7
+MUTPB = 0.2
+
+
+class moead_dzlt5(object):
 
     def __init__(self, population, toolbox, mu, cxpb, mutpb, ngen=0, maxEvaluations=0,
                  T=30, nr=2, delta=0.9, stats=None, halloffame=None, verbose=__debug__, dataDirectory="weights"):
@@ -81,7 +96,7 @@ class moead_w2(object):
 
         n = 0
 
-        while n < 300:
+        while n < 50:
             for i in xrange(len(self.population)):
                 print "Gen = ",n ," Pop = ", i
                 # STEP 2.1 Reproduction
@@ -124,30 +139,28 @@ class moead_w2(object):
         w_df = pd.DataFrame(self.lambda_)
         # p_df = pd.DataFrame(self.indArray_[0])
 
-        w_df.to_csv("weight_zdt3.csv", header=False,index=False)
+        w_df.to_csv("weight_dzlt5.csv", header=False,index=False)
         # p_df.to_csv("population.csv",header=False,index=False)
         return self.paretoPoints, self.lambda_
 
-    def transferWeitghts(self):
-
-        tem_ws = deepcopy(self.lambda_)
-        lambda_ = []
-        for i in range(len(tem_ws)):
-            tem_w = np.array(tem_ws[i])
-            tem_w += 0.0000001
-            tem_w = 1/tem_w
-            sum_w = sum(tem_w)
-            tem_w = tem_w/(sum_w)
-            lambda_.append(tem_w.tolist())
-        self.lambda_ = lambda_
 
     def initUniformWeight(self):
         # ||w_i||^2 = 1
-        p = 90.0/(self.populationSize_-1)
-        for i in xrange(self.populationSize_):
-            theta_ = 1.0 * float(i) * p
-            weight = [math.cos(math.radians(theta_)), math.sin(math.radians(theta_))]
-            self.lambda_.append(weight)
+        if self.n_objectives == 2:
+            p = 90.0/(self.populationSize_-1)
+            for i in xrange(self.populationSize_):
+                theta_ = 1.0 * float(i) * p
+                weight = [math.cos(math.radians(theta_)), math.sin(math.radians(theta_))]
+                self.lambda_.append(weight)
+        else:
+            with open('5_objective_weights.txt', 'rt') as f:
+                for line in f:
+                    a = re.split("    |\n| ", line)
+                    w = []
+                    for i in range(1, self.n_objectives + 1):
+                        w.append(float(a[i]))
+                    self.lambda_.append(w)
+
 
     def initNeighbourhood(self):
         x = [None] * self.populationSize_    # Of type float
@@ -159,7 +172,8 @@ class moead_w2(object):
                 idx[j] = j
             self.minFastSort(x, idx, self.populationSize_, self.T_)
             self.neighbourhood_.append(idx[1:self.T_+1])
-
+            # print i, "th's neigborhoods", self.neighbourhood_[i][0:self.T_]
+            # System.arraycopy(idx, 0, neighbourhood_[i], 0, T_)
 
     def updateAllNeighborhood(self):
         self.neighbourhood_ = []
@@ -200,8 +214,6 @@ class moead_w2(object):
             for j in range(self.n_objectives):
                 if self.indArray_[i].fitness.values[j] < self.z_[j]:  # For Minimization problem"
                     self.z_[j] = self.indArray_[i].fitness.values[j]
-
-
 
 
 
@@ -257,11 +269,7 @@ class moead_w2(object):
             if gte_child < gte_ind:
                 self.indArray_[idx] = child_vector
                 self.indArray_[idx].fitness.value = self.toolbox.evaluate(child_vector)
-            """
-                if gen > 150 and gen % 10 == 0:
-                    self.updateNeiWeight(idx)
-                    self.updateAllNeighborhood()
-            """
+
 
     def updateNeiWeight(self, idx):
         print "updating weight!"
@@ -280,16 +288,6 @@ class moead_w2(object):
             new_w.append(fitness[i] + delta_ *(fitness[i] - nearest_nei[i]))
             print "N", i, " :", nearest_nei[i]
 
-        """
-        for i in range(self.n_objectives):
-            if new_w[i] < 0:
-                new_w[i] = 0.00001
-
-        
-        sum_w = 1.0 * sum(np.array(new_w) ** 2)
-        for i in range(self.n_objectives):
-            new_w[i] = (new_w[i] ** 2 / sum_w) ** 0.5
-        """
 
         self.lambda_[idx] = new_w
 
@@ -381,8 +379,8 @@ class moead_w2(object):
         # print "Pareto optimal point: ", self.paretoPoint
         PF = self.toolbox.map(self.toolbox.evaluate, self.paretoPoints)
         # print "Pareto Front: ", PF
-# print "lambda: ", self.lambda_
-# print "ideal point: ", self.z_
+        # print "lambda: ", self.lambda_
+        # print "ideal point: ", self.z_
 
 
 

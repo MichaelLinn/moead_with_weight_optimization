@@ -85,7 +85,7 @@ class moead_(object):
         print "Ideal points", self.z_
 
         n = 0
-        while n < 300:
+        while n < 30:
             for i in xrange(len(self.population)):
                 print "Gen = ",n ," Pop = ", i
                 """
