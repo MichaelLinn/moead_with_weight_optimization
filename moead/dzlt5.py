@@ -27,7 +27,7 @@ def genFunc(idx, solution):
             result *= math.cos(genTheta(i, solution))
     else:
         if idx == M - 1:
-            result *= math.sin(genTheta(idx, solution))
+            result *= math.sin(genTheta(0, solution))
         else:
             for i in range(M - idx):
                 result *= math.cos(genTheta(i, solution)) \

@@ -96,7 +96,7 @@ class moead_dzlt5(object):
 
         n = 0
 
-        while n < 50:
+        while n < 150:
             for i in xrange(len(self.population)):
                 print "Gen = ",n ," Pop = ", i
                 # STEP 2.1 Reproduction
@@ -128,7 +128,7 @@ class moead_dzlt5(object):
             # Step 3.2 update neighboring
             """
 
-            if n > 100 and n % 50 == 0:
+            if n > 50 and n % 30 == 0:
                 for i in range(len(self.indArray_)):
                     self.updateNeiWeight(i)
                     self.updateAllNeighborhood()
